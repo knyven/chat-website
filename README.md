@@ -13,7 +13,7 @@ This project is a Flask web application that provides a user-friendly interface 
 
 1. Clone the repository
 
-2. Add your OpenAI API key to the root directory in a file called local.env
+2. Create a file in the root directory called local.env and add your openAI api key into it.
 
 3. Runn app.py and the website should be live on localhost:5000
 The web application should now be running on http://127.0.0.1:5000/
