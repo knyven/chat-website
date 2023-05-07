@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Login</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -25,16 +25,50 @@
             border-radius: 10px 10px 0 0;
         }
 
-        p {
+        form {
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            width: 300px;
+            padding-bottom: 20px;
+        }
+
+        input[type="submit"] {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            border-radius: 5px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .message-container {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             text-align: center;
-            font-size: 1.2em;
+        }
+
+        .message {
+            display: inline-block;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
         }
 
     </style>
 </head>
 <body>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
+
+{% with messages = get_flashed_messages(with_categories=true, category_filter=["success", "error", "info"])[-1:] %}
 {% if messages %}
 {% for category, message in messages %}
 <p class="{{ category }}">{{ message }}</p>
@@ -42,9 +76,23 @@
 {% endif %}
 {% endwith %}
 
-    <h1>Welcome to the Chat Application</h1>
-    <p>Please login to start chatting.</p>
+<form action="{{ url_for('login') }}" method="post">
+    <h1>Login</h1>
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required>
+
+    <input type="submit" value="Login">
+</form>
+<button onclick="goToRegister()">Register</button>
+
+<script>
+    function goToRegister() {
+        window.location.href = '{{ url_for('register') }}';
+    }
+</script>
 
 </body>
 </html>
-

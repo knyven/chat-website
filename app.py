@@ -46,7 +46,7 @@ conversation_history = [
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('login.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -58,11 +58,16 @@ def login():
         if user and bcrypt.check_password_hash(user.password, password):
             login_user(user)
             flash('Logged in successfully.', 'success')
-            return redirect(url_for('chat'))
+            return redirect(url_for('home'))
         else:
             flash('Incorrect username or password.', 'error')
             return redirect(url_for('index'))
-    return render_template('index.html')
+    return render_template('login.html')
+
+@app.route('/home')
+@login_required
+def home():
+    return render_template('home.html')
 
 
 @app.route('/register', methods=['GET', 'POST'])

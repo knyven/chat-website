@@ -68,7 +68,20 @@
         <input type="password" id="password" name="password" required>
 
         <input type="submit" value="Register">
-        <input type="submit" value="Register">
     </form>
+
+    <button onclick="goToLogin()">Login</button>
+
+    <script>
+        function goToLogin() {
+            window.location.href = '{{ url_for('login') }}';
+        }
+    </script>
 </body>
 </html>
+
+
+
+
+
+
