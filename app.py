@@ -3,12 +3,16 @@ from flask_login import LoginManager, login_required, UserMixin, login_user, log
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 import openai
+import click
 import os
 import json
 import requests
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key'
+
+# Read secret key from local.env file
+with open("local.env", "r") as f:
+    app.secret_key = f.read().strip()
 
 # Configure database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
@@ -44,6 +48,23 @@ conversation_history = [
 def index():
     return render_template('index.html')
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+
+        if user and bcrypt.check_password_hash(user.password, password):
+            login_user(user)
+            flash('Logged in successfully.', 'success')
+            return redirect(url_for('chat'))
+        else:
+            flash('Incorrect username or password.', 'error')
+            return redirect(url_for('index'))
+    return render_template('index.html')
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -65,29 +86,14 @@ def register():
 
     return render_template('register.html')
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('chat'))
-
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        user = User.query.filter_by(username=username).first()
-
-        if user and bcrypt.check_password_hash(user.password, password):
-            login_user(user)
-            return redirect(url_for('chat'))
-        else:
-            flash('Login failed. Check your username and password and try again.', 'danger')
-
-    return render_template('login.html')
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
+    flash('Logged out successfully.', 'info')
     return redirect(url_for('index'))
+
 
 @app.route('/chat')
 @login_required
@@ -119,9 +125,30 @@ def send_to_chat_gpt(message):
     except Exception as e:
         print("Error:", e)
         return "Error: Unable to get a response from ChatGPT"
+    
+
+def create_test_user(username, password):
+    # Check if the user already exists
+    user = User.query.filter_by(username=username).first()
+
+    if not user:
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        test_user = User(username=username, password=hashed_password)
+        db.session.add(test_user)
+        db.session.commit()
+        print(f"Test user '{username}' created.")
+    else:
+        print(f"Test user '{username}' already exists.")
+
+# Add a new CLI command to create a test user
+@app.cli.command("create-test-user")
+@click.argument("username")
+@click.argument("password")
+def create_test_user_cli(username, password):
+    create_test_user(username, password)
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all() 
+        db.create_all()
+        create_test_user("testuser", "testpassword")  # Create a test user
     app.run(debug=True)
-
