@@ -94,7 +94,6 @@ def logout():
     flash('Logged out successfully.', 'info')
     return redirect(url_for('index'))
 
-
 @app.route('/chat')
 @login_required
 def chat():
